@@ -54,6 +54,7 @@ class FakeElement {
 class FakeDocument {
   constructor() {
     this.buttonTarget = null;
+    this.videoPlayer = null;
     this.listeners = new Map();
     this.roots = [];
     this.title = "Test Video - YouTube";
@@ -85,6 +86,10 @@ class FakeDocument {
   querySelector(selector) {
     if (selector === buttonTargetSelector) {
       return this.buttonTarget;
+    }
+
+    if (selector === "video.html5-main-video") {
+      return this.videoPlayer;
     }
 
     return null;
@@ -120,6 +125,7 @@ function createHarness() {
   const document = new FakeDocument();
   const animationFrames = [];
   const mutationObservers = [];
+  let runtimeMessageListener = null;
   const location = {
     href: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
   };
@@ -143,7 +149,9 @@ function createHarness() {
     chrome: {
       runtime: {
         onMessage: {
-          addListener() {},
+          addListener(listener) {
+            runtimeMessageListener = listener;
+          },
         },
         sendMessage() {
           return Promise.resolve();
@@ -186,6 +194,14 @@ function createHarness() {
     return document.roots.reduce((count, root) => count + countElementsById(root, id), 0);
   }
 
+  function sendRuntimeMessage(message) {
+    let response;
+    runtimeMessageListener(message, {}, (value) => {
+      response = value;
+    });
+    return response;
+  }
+
   return {
     countById,
     document,
@@ -193,6 +209,7 @@ function createHarness() {
     location,
     mutationObservers,
     notifyMutation,
+    sendRuntimeMessage,
     setButtonTarget,
   };
 }
@@ -256,4 +273,24 @@ test("removes the button off watch pages and restores it on return", () => {
   harness.flushAnimationFrames();
   assert.equal(harness.countById(tutorButtonId), 1);
   assert.equal(harness.countById(tutorButtonContainerId), 1);
+});
+
+test("returns normalized YouTube video context", () => {
+  const harness = createHarness();
+  harness.document.videoPlayer = {
+    currentTime: 83.8,
+    duration: 312,
+    seekable: { length: 1 },
+  };
+
+  const response = harness.sendRuntimeMessage({ type: "getVideoContext" });
+
+  assert.equal(response.status, "ready");
+  assert.equal(response.context.source.platform, "youtube");
+  assert.equal(response.context.source.sourceId, "dQw4w9WgXcQ");
+  assert.equal(response.context.title, "Test Video");
+  assert.equal(response.context.currentTimeSeconds, 83.8);
+  assert.equal(response.context.durationSeconds, 312);
+  assert.equal(response.context.capabilities.seek, "available");
+  assert.equal(response.context.capabilities.transcript, "unavailable");
 });

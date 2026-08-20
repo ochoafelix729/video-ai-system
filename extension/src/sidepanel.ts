@@ -1,7 +1,7 @@
 namespace SidePanel {
   const videoStatusSelector = "#video-status";
-  const noVideoMessage = "Open a YouTube watch page to use AI Tutor.";
-  const contextLoadErrorMessage = "Unable to read the current YouTube video.";
+  const noVideoMessage = "No supported video was found on this page.";
+  const activationMessage = "Click the AI Video Tutor toolbar icon on a video page to start.";
 
   function getVideoStatusElement(): HTMLElement | null {
     return document.querySelector<HTMLElement>(videoStatusSelector);
@@ -40,7 +40,7 @@ namespace SidePanel {
     return activeTab?.id ?? null;
   }
 
-  async function getActiveVideoContext(): Promise<TutorMessages.VideoContext | null> {
+  async function getActiveVideoContext(): Promise<TutorMessages.VideoContextResponse | null> {
     const tabId = await getActiveTabId();
     if (tabId === null) {
       return null;
@@ -52,7 +52,7 @@ namespace SidePanel {
 
     return chrome.tabs.sendMessage<
       TutorMessages.GetVideoContextMessage,
-      TutorMessages.VideoContext | null
+      TutorMessages.VideoContextResponse
     >(tabId, message);
   }
 
@@ -61,20 +61,46 @@ namespace SidePanel {
     return `Ready for \u201c${context.title}\u201d at ${timestamp}.`;
   }
 
+  function getEmbeddedPlayerMessage(providerHosts: string[]): string {
+    if (providerHosts.length === 0) {
+      return "This page uses an embedded video player that needs a provider-specific adapter.";
+    }
+
+    return `Embedded video detected (${providerHosts.join(", ")}). A provider-specific adapter is required.`;
+  }
+
   async function loadVideoContext(): Promise<void> {
-    const context = await getActiveVideoContext();
-    if (context === null) {
+    const response = await getActiveVideoContext();
+    if (response === null || response.status === "no_video") {
       setVideoStatus(noVideoMessage);
       return;
     }
 
-    setVideoStatus(getReadyMessage(context));
+    if (response.status === "embedded_player") {
+      setVideoStatus(getEmbeddedPlayerMessage(response.providerHosts));
+      return;
+    }
+
+    setVideoStatus(getReadyMessage(response.context));
   }
 
   function handleVideoContextLoadFailure(error: unknown): void {
-    setVideoStatus(contextLoadErrorMessage);
-    console.error("Unable to load the current YouTube video context.", error);
+    setVideoStatus(activationMessage);
+    console.error("Unable to load the current video context.", error);
   }
 
+  function handleRuntimeMessage(message: unknown): void {
+    if (typeof message !== "object" || message === null) {
+      return;
+    }
+
+    if ((message as { type?: unknown }).type !== "videoContextReady") {
+      return;
+    }
+
+    void loadVideoContext().catch(handleVideoContextLoadFailure);
+  }
+
+  chrome.runtime.onMessage.addListener(handleRuntimeMessage);
   void loadVideoContext().catch(handleVideoContextLoadFailure);
 }

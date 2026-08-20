@@ -1,12 +1,13 @@
 {
   "manifest_version": 3,
-  "name": "YouTube AI Tutor",
+  "name": "AI Video Tutor",
   "version": "0.1.0",
   "minimum_chrome_version": "116",
-  "description": "Ask grounded questions about the YouTube video you are watching.",
+  "description": "Learn with grounded AI tutoring for supported educational videos.",
   "permissions": [
-    "sidePanel",
-    "tabs"
+    "activeTab",
+    "scripting",
+    "sidePanel"
   ],
   "host_permissions": [
     "*://www.youtube.com/*",
@@ -15,6 +16,9 @@
   "background": {
     "service_worker": "dist/service-worker.js",
     "type": "module"
+  },
+  "action": {
+    "default_title": "Open AI Video Tutor"
   },
   "content_scripts": [
     {

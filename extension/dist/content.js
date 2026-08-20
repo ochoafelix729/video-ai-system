@@ -25,11 +25,34 @@ var ContentScript;
         if (videoId === null || player === null) {
             return null;
         }
+        const durationSeconds = Number.isFinite(player.duration) && player.duration > 0
+            ? player.duration
+            : undefined;
         return {
-            videoId,
-            videoUrl: window.location.href,
+            source: {
+                platform: "youtube",
+                sourceId: videoId,
+                pageUrl: window.location.href,
+            },
             title: document.title.replace(" - YouTube", ""),
             currentTimeSeconds: player.currentTime,
+            durationSeconds,
+            capabilities: {
+                seek: player.seekable.length > 0 ? "available" : "unavailable",
+                transcript: "unavailable",
+                visualEvidence: "unavailable",
+                ingestion: "unavailable",
+            },
+        };
+    }
+    function getVideoContextResponse() {
+        const context = getVideoContext();
+        if (context === null) {
+            return { status: "no_video" };
+        }
+        return {
+            status: "ready",
+            context,
         };
     }
     function isMessageWithType(message, expectedType) {
@@ -102,7 +125,7 @@ var ContentScript;
         if (!isGetVideoContextMessage(message)) {
             return;
         }
-        sendResponse(getVideoContext());
+        sendResponse(getVideoContextResponse());
     }
     function observeYouTubePageChanges() {
         const pageObserver = new MutationObserver(scheduleTutorButtonCheck);
