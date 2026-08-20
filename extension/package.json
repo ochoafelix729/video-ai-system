@@ -1,0 +1,14 @@
+{
+  "name": "youtube-ai-tutor-extension",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "build": "tsc --project tsconfig.json",
+    "test": "npm run build && node --test test/*.test.mjs",
+    "typecheck": "tsc --project tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.300",
+    "typescript": "^5.8.3"
+  }
+}

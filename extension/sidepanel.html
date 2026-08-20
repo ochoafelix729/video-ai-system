@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI Tutor</title>
+    <link rel="stylesheet" href="sidepanel.css" />
+  </head>
+  <body>
+    <main>
+      <header>
+        <p class="eyebrow">YOUTUBE AI TUTOR</p>
+        <h1>Ask about this video</h1>
+      </header>
+      <p id="video-status" role="status">Loading video context…</p>
+      <form id="question-form">
+        <label for="question">Your question</label>
+        <textarea
+          id="question"
+          name="question"
+          placeholder="What is being explained here?"
+          rows="4"
+          disabled
+        ></textarea>
+        <button type="submit" disabled>Ask AI Tutor</button>
+      </form>
+      <p class="hint">Question answering will be enabled when the indexing API is connected.</p>
+    </main>
+    <script type="module" src="dist/sidepanel.js"></script>
+  </body>
+</html>

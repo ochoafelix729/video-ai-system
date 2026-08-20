@@ -1,12 +1,27 @@
 import yt_dlp
 import boto3
 import tempfile
+import os
 from pathlib import Path
+
 
 class YoutubeDownloader:
     def __init__(self):
         self.downloader = yt_dlp
-        self.s3 = boto3.client('s3')
+        access_key_id = os.getenv("AWS_ACCESS_KEY_ID") or os.getenv("AWS_ACCESS_KEY")
+        secret_access_key = os.getenv("AWS_SECRET_ACCESS_KEY")
+        session_token = os.getenv("AWS_SESSION_TOKEN")
+
+        if access_key_id and secret_access_key:
+            client_options = {
+                "aws_access_key_id": access_key_id,
+                "aws_secret_access_key": secret_access_key,
+            }
+            if session_token:
+                client_options["aws_session_token"] = session_token
+            self.s3 = boto3.client("s3", **client_options)
+        else:
+            self.s3 = boto3.client("s3")
 
     def download_to_s3(self, youtube_url: str, bucket: str) -> str:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -17,6 +32,12 @@ class YoutubeDownloader:
                 "merge_output_format": "mp4",
                 "outtmpl": output_template,
                 "noplaylist": True,
+                "extractor_args": {
+                    "youtube": {
+                        "player_client": ["web_embedded"],
+                    },
+                },
+                "remote_components": ["ejs:github"],
             }
 
             with yt_dlp.YoutubeDL(ydl_options) as ydl:
