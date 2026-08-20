@@ -3,3 +3,4 @@ __pycache__
 __pycache__/*
 .env
 extension/node_modules/
+.DS_Store
