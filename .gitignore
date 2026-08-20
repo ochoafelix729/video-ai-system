@@ -1,6 +1,6 @@
 venv/*
-__pycache__
-__pycache__/*
+__pycache__/
+*.py[cod]
 .env
 extension/node_modules/
 .DS_Store
