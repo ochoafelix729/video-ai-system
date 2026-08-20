@@ -1,6 +1,8 @@
-# YouTube AI Tutor Extension
+# AI Video Tutor Extension — YouTube Prototype
 
-This is the first, UI-only milestone of the Chrome/Chromium extension. It injects one **AI Tutor** button on standard YouTube watch pages. Selecting it opens a Chrome side panel and reads the current video title and playback timestamp. No video data is sent anywhere yet.
+This is the first, UI-only milestone of the broader **AI Video Tutor** product. The current implementation remains YouTube-specific: it injects one **AI Tutor** button on standard YouTube watch pages. Selecting it opens a Chrome side panel and reads the current video title and playback timestamp. No video data is sent anywhere yet.
+
+The planned product will support permitted educational video across multiple sites through capability-based platform adapters. See the repository's [high-level plan](../HIGH-LEVEL-PLAN.md), [architecture](../docs/ARCHITECTURE.md), and [platform feasibility matrix](../docs/PLATFORM-FEASIBILITY.md). Those documents describe future work; the commands and behavior below describe what is implemented now.
 
 Chrome 116 or later is required because the extension opens the side panel from its injected button.
 
