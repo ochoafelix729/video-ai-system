@@ -18,6 +18,20 @@ declare namespace TutorMessages {
     type: "getVideoContext";
   }
 
+  interface GetTranscriptCuesMessage {
+    type: "getTranscriptCues";
+  }
+
+  interface TranscriptCue {
+    startSeconds: number;
+    endSeconds: number;
+    text: string;
+  }
+
+  interface TranscriptCuesResponse {
+    cues: TranscriptCue[];
+  }
+
   interface VideoContextReadyMessage {
     type: "videoContextReady";
   }
@@ -31,6 +45,8 @@ declare namespace TutorMessages {
     title: string;
     currentTimeSeconds: number;
     durationSeconds?: number;
+    isPlaying: boolean;
+    playbackRate: number;
     capabilities: VideoCapabilities;
   }
 
@@ -44,6 +60,33 @@ declare namespace TutorMessages {
       }
     | {
         status: "embedded_player";
-        providerHosts: string[];
+      providerHosts: string[];
       };
+
+  interface StartCaptureMessage {
+    type: "startCapture";
+    tabId: number;
+    backendUrl: string;
+    accessToken: string;
+    captureSessionId: string;
+  }
+
+  interface StopCaptureMessage {
+    type: "stopCapture";
+  }
+
+  interface GetCaptureTimestampMessage {
+    type: "getCaptureTimestamp";
+    tabId: number;
+  }
+
+  interface CaptureTimestampResponse {
+    currentTimeSeconds: number;
+    isPlaying: boolean;
+    playbackRate: number;
+  }
+
+  type CaptureControlResponse =
+    | { status: "started" | "stopped" }
+    | { status: "failed"; message: string };
 }

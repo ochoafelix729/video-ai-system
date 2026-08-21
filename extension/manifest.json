@@ -6,12 +6,18 @@
   "description": "Learn with grounded AI tutoring for supported educational videos.",
   "permissions": [
     "activeTab",
+    "identity",
+    "offscreen",
     "scripting",
-    "sidePanel"
+    "sidePanel",
+    "storage",
+    "tabCapture"
   ],
   "host_permissions": [
     "*://www.youtube.com/*",
-    "*://youtube.com/*"
+    "*://youtube.com/*",
+    "https://*.amazoncognito.com/*",
+    "http://localhost:8000/*"
   ],
   "background": {
     "service_worker": "dist/service-worker.js",
@@ -30,5 +36,6 @@
   ],
   "side_panel": {
     "default_path": "sidepanel.html"
-  }
+  },
+  "web_accessible_resources": []
 }

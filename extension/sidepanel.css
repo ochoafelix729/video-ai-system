@@ -41,6 +41,33 @@ h1 {
   margin: 0;
 }
 
+#conversation {
+  display: grid;
+  gap: 10px;
+}
+
+.message {
+  border-radius: 8px;
+  line-height: 1.45;
+  margin: 0;
+  padding: 10px 12px;
+}
+
+.message.user {
+  background: #f2f2f2;
+}
+
+.message.tutor {
+  background: #fff4f4;
+  border-left: 3px solid #c00;
+}
+
+.citations {
+  color: #606060;
+  font-size: 12px;
+  margin: 4px 0 0;
+}
+
 form {
   display: grid;
   gap: 8px;

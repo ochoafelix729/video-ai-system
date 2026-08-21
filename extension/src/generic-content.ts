@@ -176,11 +176,13 @@ namespace GenericContentScript {
       title: getVideoTitle(video),
       currentTimeSeconds: video.currentTime,
       durationSeconds,
+      isPlaying: !video.paused && !video.ended,
+      playbackRate: video.playbackRate,
       capabilities: {
         seek: video.seekable.length > 0 ? "available" : "unavailable",
         transcript: "unavailable",
-        visualEvidence: "unavailable",
-        ingestion: "unavailable",
+        visualEvidence: "user_tab_capture",
+        ingestion: "browser_evidence",
       },
     };
   }
@@ -206,16 +208,39 @@ namespace GenericContentScript {
     return { status: "no_video" };
   }
 
+  function getTranscriptCues(): TutorMessages.TranscriptCue[] {
+    const candidate = selectVideoCandidate(scanPage().candidates);
+    if (candidate === null) {
+      return [];
+    }
+    const cues: TutorMessages.TranscriptCue[] = [];
+    for (const track of Array.from(candidate.video.textTracks)) {
+      if (track.cues === null) {
+        continue;
+      }
+      for (const cue of Array.from(track.cues)) {
+        const text = "text" in cue && typeof cue.text === "string" ? cue.text.trim() : "";
+        if (text) {
+          cues.push({ startSeconds: cue.startTime, endSeconds: cue.endTime, text });
+        }
+      }
+    }
+    return cues;
+  }
+
   function handleRuntimeMessage(
     message: unknown,
     _sender: chrome.runtime.MessageSender,
-    sendResponse: (response: TutorMessages.VideoContextResponse) => void,
+    sendResponse: (response: unknown) => void,
   ): void {
-    if (!isGetVideoContextMessage(message)) {
+    if (isGetVideoContextMessage(message)) {
+      sendResponse(getVideoContextResponse());
       return;
     }
-
-    sendResponse(getVideoContextResponse());
+    if (isMessageWithType(message, "getTranscriptCues")) {
+      const response: TutorMessages.TranscriptCuesResponse = { cues: getTranscriptCues() };
+      sendResponse(response);
+    }
   }
 
   function install(): void {

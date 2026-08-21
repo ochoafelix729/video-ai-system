@@ -13,6 +13,8 @@
         <h1>Ask about this video</h1>
       </header>
       <p id="video-status" role="status">Loading video context…</p>
+      <button id="capture-button" type="button" disabled>Start tutoring</button>
+      <section id="conversation" aria-live="polite"></section>
       <form id="question-form">
         <label for="question">Your question</label>
         <textarea
@@ -24,8 +26,11 @@
         ></textarea>
         <button type="submit" disabled>Ask AI Tutor</button>
       </form>
-      <p class="hint">Question answering will be enabled when the indexing API is connected.</p>
+      <p class="hint">Tutoring captures only this tab after you select Start tutoring.</p>
     </main>
+    <script src="dist/config.js"></script>
+    <script src="dist/auth.js"></script>
+    <script src="dist/api.js"></script>
     <script type="module" src="dist/sidepanel.js"></script>
   </body>
 </html>

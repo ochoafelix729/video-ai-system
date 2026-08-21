@@ -37,11 +37,13 @@ var ContentScript;
             title: document.title.replace(" - YouTube", ""),
             currentTimeSeconds: player.currentTime,
             durationSeconds,
+            isPlaying: !player.paused && !player.ended,
+            playbackRate: player.playbackRate,
             capabilities: {
                 seek: player.seekable.length > 0 ? "available" : "unavailable",
                 transcript: "unavailable",
-                visualEvidence: "unavailable",
-                ingestion: "unavailable",
+                visualEvidence: "user_tab_capture",
+                ingestion: "browser_evidence",
             },
         };
     }
@@ -63,6 +65,25 @@ var ContentScript;
     }
     function isGetVideoContextMessage(message) {
         return isMessageWithType(message, "getVideoContext");
+    }
+    function getTranscriptCues() {
+        const player = document.querySelector("video.html5-main-video");
+        if (player === null) {
+            return [];
+        }
+        const cues = [];
+        for (const track of Array.from(player.textTracks)) {
+            if (track.cues === null) {
+                continue;
+            }
+            for (const cue of Array.from(track.cues)) {
+                const text = "text" in cue && typeof cue.text === "string" ? cue.text.trim() : "";
+                if (text) {
+                    cues.push({ startSeconds: cue.startTime, endSeconds: cue.endTime, text });
+                }
+            }
+        }
+        return cues;
     }
     function openTutorPanel() {
         const message = {
@@ -122,10 +143,14 @@ var ContentScript;
         placeTutorButton(target);
     }
     function handleRuntimeMessage(message, _sender, sendResponse) {
-        if (!isGetVideoContextMessage(message)) {
+        if (isGetVideoContextMessage(message)) {
+            sendResponse(getVideoContextResponse());
             return;
         }
-        sendResponse(getVideoContextResponse());
+        if (isMessageWithType(message, "getTranscriptCues")) {
+            const response = { cues: getTranscriptCues() };
+            sendResponse(response);
+        }
     }
     function observeYouTubePageChanges() {
         const pageObserver = new MutationObserver(scheduleTutorButtonCheck);
