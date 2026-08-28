@@ -1,6 +1,43 @@
-venv/*
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+.envrc
+.direnv/
+*.pem
+*.key
+*.p12
+*.pfx
+credentials.json
+secrets.json
+secrets/
+
+# Local AI/tool configuration
+.agents/
+.codex/
+
+# Python
+venv/
+.venv/
 __pycache__/
 *.py[cod]
-.env
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# JavaScript and generated extension bundles
 extension/node_modules/
+extension/dist/
+
+# Editors and operating systems
+.idea/
+.vscode/
 .DS_Store
+Thumbs.db
+
+# Local runtime artifacts
+*.log
+.tmp/
